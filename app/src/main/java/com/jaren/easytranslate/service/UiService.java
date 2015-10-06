@@ -6,7 +6,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.os.IBinder;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,6 +19,8 @@ import android.widget.Toast;
 import com.jaren.easytranslate.R;
 
 public class UiService extends Service {
+    private static final String TAG = "UiService";
+
     public UiService() {
     }
 
@@ -41,9 +45,17 @@ public class UiService extends Service {
         wmParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         wmParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         wmParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-        wmParams.gravity = Gravity.RIGHT | Gravity.TOP;
         wmParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         wmParams.format = PixelFormat.RGBA_8888;
+
+//        get screen size of phone, and set the right place of window
+        DisplayMetrics metrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(metrics);
+        wmParams.x = metrics.widthPixels-48;
+        wmParams.y = metrics.heightPixels/2-48;
+
+        Log.d(TAG,String.valueOf(wmParams.x));
+        Log.d(TAG,String.valueOf(wmParams.y));
 
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.window_main,null);
