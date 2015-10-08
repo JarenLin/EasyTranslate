@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jaren.easytranslate.R;
@@ -51,14 +52,20 @@ public class UiService extends Service {
 //        get screen size of phone, and set the right place of window
         DisplayMetrics metrics = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(metrics);
-        wmParams.x = metrics.widthPixels-48;
-        wmParams.y = metrics.heightPixels/2-48;
-
-        Log.d(TAG,String.valueOf(wmParams.x));
-        Log.d(TAG,String.valueOf(wmParams.y));
 
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.window_main,null);
+
+//        get window measure
+        int windowWidth = linearLayout.findViewById(R.id.winstv).getMeasuredWidth();
+        int windowHeight = linearLayout.findViewById(R.id.winstv).getMeasuredHeight();
+
+//        set x/y according window's measure, here is right & middle of the phone screen
+        wmParams.x = metrics.widthPixels/2-windowWidth;
+        wmParams.y = 0-windowHeight;
+
+        Log.d(TAG,String.valueOf(wmParams.x));
+        Log.d(TAG, String.valueOf(wmParams.y));
 
         windowManager.addView(linearLayout,wmParams);
 
