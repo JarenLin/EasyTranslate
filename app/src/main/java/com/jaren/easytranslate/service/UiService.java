@@ -57,8 +57,8 @@ public class UiService extends Service {
         LinearLayout linearLayout = (LinearLayout) inflater.inflate(R.layout.window_main,null);
 
 //        get window measure
-        int windowWidth = linearLayout.findViewById(R.id.winstv).getMeasuredWidth();
-        int windowHeight = linearLayout.findViewById(R.id.winstv).getMeasuredHeight();
+        int windowWidth = linearLayout.findViewById(R.id.ic_win).getMeasuredWidth();
+        int windowHeight = linearLayout.findViewById(R.id.ic_win).getMeasuredHeight();
 
 //        set x/y according window's measure, here is right & middle of the phone screen
         wmParams.x = metrics.widthPixels/2-windowWidth;

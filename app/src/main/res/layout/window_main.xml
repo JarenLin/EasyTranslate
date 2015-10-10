@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/winstv"
+    <ImageView
+        android:id="@+id/ic_win"
+        android:background="@mipmap/ic_win_48x48"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="i am a window's textview!"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
