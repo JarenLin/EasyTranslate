@@ -37,8 +37,11 @@ public class UiService extends Service {
     private float touchX = 0;
     private float touchY = 0;
 
+    ImageView imageView = null;
+
 //    状态栏的高度
     private int statusBarHeight = 56;//wonder how to get statusbar's height!!!
+    private boolean getSize = false;
 
     public UiService() {
     }
@@ -47,6 +50,76 @@ public class UiService extends Service {
     public void onCreate() {
         super.onCreate();
         createWindow();
+        if (imageView != null){
+            setImgTouchListener();
+        }
+    }
+
+    private void setImgTouchListener() {
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN: {
+                        Log.d(TAG, "imageView get touch down!");
+                        imageView.setBackgroundResource(R.mipmap.ic_light);
+                    }
+                    break;
+                    case MotionEvent.ACTION_MOVE: {
+                        Log.d(TAG, "imageView get touch move!");
+                        updateWinManager(event);
+                    }
+                    break;
+                    case MotionEvent.ACTION_UP: {
+                        Log.d(TAG, "imageView get touch up!");
+                        imageView.setBackgroundResource(R.mipmap.ic_mask);
+                    }
+                    break;
+                    default: {
+                        Log.e(TAG, "imageview get unkown touch event!");
+                    }
+                    break;
+                }
+
+                return true;
+            }
+        });
+    }
+
+    private void updateWinManager(MotionEvent event) {
+        //x---48
+        //y
+        //|
+        //|
+        //48
+        //new axes, 向量运算
+//                let the image always behind finger
+//                solution 1.
+        this.touchX = (event.getRawX() - imgWidth / 2) + wmXMin;
+        this.touchY = (event.getRawY() - imgHeight / 2) + wmYMin;
+        wmParams.x = (int) this.touchX;
+        wmParams.y = (int) this.touchY;
+//                solution 2.
+//                float imgX = event.getX();
+//                float imgY = event.getY();
+//                wmParams.x = (int) (wmParams.x + (imgX - imgWidth/2));
+//                wmParams.y = (int) (wmParams.y + (imgY - imgHeight/2));
+
+        //how about out of phone player size?
+//                if using solution 2, this control must have
+//                if (wmParams.x < wmXMin){
+//                    wmParams.x = wmXMin;
+//                }else if (wmParams.x > wmXMax){
+//                    wmParams.x = wmXMax;
+//                }
+//                if (wmParams.y < wmYMin){
+//                    wmParams.y = wmYMin;
+//                }else if (wmParams.y > wmYMax){
+//                    wmParams.y = wmYMax;
+//                }
+
+        windowManager.updateViewLayout(linearLayout, wmParams);
     }
 
     @Override
@@ -78,20 +151,23 @@ public class UiService extends Service {
         linearLayout = (LinearLayout) inflater.inflate(R.layout.window_main,null);
 
 //        get window measure
-        final ImageView imageView = (ImageView) linearLayout.findViewById(R.id.ic_win);
+        imageView = (ImageView) linearLayout.findViewById(R.id.ic_win);
         imageView.setBackgroundResource(R.mipmap.ic_mask);
 
 //        this listener will be called two times when windows create, and I don't know why.
         imageView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                imgHeight = imageView.getWidth();
-                imgWidth = imageView.getHeight();
-                Log.d(TAG, "onGlobalLayout: " + "layoutWidth==" + layoutWidth + " layoutHeight==" + layoutHeight );
-                wmXMin = -layoutWidth/2 + imgWidth/2;
-                wmXMax = layoutWidth/2 - imgWidth/2;
-                wmYMin = (-layoutHeight - statusBarHeight)/2 + imgHeight/2;
-                wmYMax = (layoutHeight - statusBarHeight)/2 - imgHeight/2;
+                if (getSize == false){
+                    imgHeight = imageView.getWidth();
+                    imgWidth = imageView.getHeight();
+                    Log.d(TAG, "onGlobalLayout: " + "layoutWidth==" + layoutWidth + " layoutHeight==" + layoutHeight );
+                    wmXMin = -layoutWidth/2 + imgWidth/2;
+                    wmXMax = layoutWidth/2 - imgWidth/2;
+                    wmYMin = (-layoutHeight - statusBarHeight)/2 + imgHeight/2;
+                    wmYMax = (layoutHeight - statusBarHeight)/2 - imgHeight/2;
+                    getSize = true;
+                }
             }
         });
 
@@ -102,60 +178,7 @@ public class UiService extends Service {
         windowManager.addView(linearLayout, wmParams);
 
 //        how can I get the move event?
-        imageView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int action = event.getAction();
-                switch (action){
-                    case MotionEvent.ACTION_DOWN:{
-                        Log.d(TAG,"imageView get touch down!");
-                        imageView.setBackgroundResource(R.mipmap.ic_light);
-                    }break;
-                    case MotionEvent.ACTION_MOVE:{
-                        Log.d(TAG,"imageView get touch move!");
-                    }break;
-                    case MotionEvent.ACTION_UP:{
-                        Log.d(TAG,"imageView get touch up!");
-                    }break;
-                    default:{
-                        Log.e(TAG,"imageview get unkown touch event!");
-                    }break;
-                }
-                //x---48
-                //y
-                //|
-                //|
-                //48
-                //new axes, 向量运算
-//                let the image always behind finger
-//                solution 1.
-                touchX = (event.getRawX() - imgWidth/2) + wmXMin;
-                touchY = (event.getRawY() - imgHeight/2) + wmYMin;
-                wmParams.x = (int) touchX;
-                wmParams.y = (int) touchY;
-//                solution 2.
-//                float imgX = event.getX();
-//                float imgY = event.getY();
-//                wmParams.x = (int) (wmParams.x + (imgX - imgWidth/2));
-//                wmParams.y = (int) (wmParams.y + (imgY - imgHeight/2));
 
-                //how about out of phone player size?
-//                if using solution 2, this control must have
-//                if (wmParams.x < wmXMin){
-//                    wmParams.x = wmXMin;
-//                }else if (wmParams.x > wmXMax){
-//                    wmParams.x = wmXMax;
-//                }
-//                if (wmParams.y < wmYMin){
-//                    wmParams.y = wmYMin;
-//                }else if (wmParams.y > wmYMax){
-//                    wmParams.y = wmYMax;
-//                }
-
-                windowManager.updateViewLayout(linearLayout, wmParams);
-                return false;
-            }
-        });
     }
 
     @Override
